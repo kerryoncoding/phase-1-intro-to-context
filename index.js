@@ -14,36 +14,37 @@ function createEmployeeRecord(data){
 
 function createEmployeeRecords(arrayOfArrays){
    let newArray = []
-   for (let i=0; i<arrayOfArrays.length; i++){
-      newArray.push(createEmployeeRecord(arrayOfArrays[i]))
-   }
+   arrayOfArrays.forEach(element => {
+      newArray.push(createEmployeeRecord(element))
+   });
    return newArray
 }
 
 function createTimeInEvent(employeeRecord, dateStamp){
-   let dateStampObj = [{
+   //console.log(dateStamp)
+   let dateStampObj = {
       type: "TimeIn",
       hour: Number(dateStamp.substr(11,14)),
       date: dateStamp.substr(0,10)
-   }]
-   employeeRecord.timeInEvents = dateStampObj
+   }
+   employeeRecord.timeInEvents =  [dateStampObj, ...employeeRecord.timeInEvents]
    return employeeRecord
 }
 
 function createTimeOutEvent(employeeRecord, dateStamp){
-   let dateStampObj = [{
+   let dateStampObj = {
       type: "TimeOut",
       hour: Number(dateStamp.substr(11,14)),
       date: dateStamp.substr(0,10)
-   }]
-   employeeRecord.timeOutEvents = dateStampObj
+   }
+   employeeRecord.timeOutEvents =  [dateStampObj, ...employeeRecord.timeOutEvents]
    return employeeRecord
 }
 
 function hoursWorkedOnDate(employeeRecord, date){
    //use the date to find the correct object... then grab that object's time info
    for (let i = 0; i<employeeRecord.timeOutEvents.length; i++){
-      if (employeeRecord.timeOutEvents[i].date = date){
+      if (employeeRecord.timeOutEvents[i].date === date){
          return((employeeRecord.timeOutEvents[i].hour - employeeRecord.timeInEvents[i].hour)/100)
       }
    }
@@ -55,18 +56,21 @@ function wagesEarnedOnDate(employeeRecord, date){
 
 
 function allWagesFor(employeeRecord){
-   //console.log((employeeRecord))
-   employeeRecord.foreach(e => console.log(e))
-   //console.log(wagesEarnedOnDate(employeeRecord))
+   let totalWages = 0
+   employeeRecord.timeInEvents.forEach(e =>{   
+   totalWages = totalWages + (hoursWorkedOnDate(employeeRecord, e.date))
+   })
+   return (totalWages * employeeRecord.payPerHour)
 
 }
 
 function calculatePayroll(employeeRecordArray){
-   //console.log(employeeRecordArray)
-   let initialValue = 0
-   const sumValue = employeeRecordArray.reduce((accumulator, currentValue) => accumulator + currentValue, initialValue) 
-   return sumValue
+   let payroll = 0
+   employeeRecordArray.forEach(e => {
+      payroll = payroll + allWagesFor(e)
+   })
+   return payroll
 }
 
-/// should return to this later... didn't use map or reduce... need to think about it.
+
 
